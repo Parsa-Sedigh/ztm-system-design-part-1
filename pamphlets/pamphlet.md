@@ -271,20 +271,51 @@ origin server. This gonna work for users all around the world.
 
 This reduces the latency.
 ![](../img/15-1.png)
+
 ## 16-System Design Reminder
 
-
 ## 17- Principles of System Design - Availability
+- availability
+- reliability
+
+### Availability
+Availability is the percentage of time within some given period that your system or app can be used.
+![](../img/17-1.png)
+![](../img/17-2.png)
+
+### Percentages of uptime we wanna aim for
+![](../img/17-3.png)
+![](../img/17-4.png)
+
+Cloud providers aim for 2 to 4 nines.
+
 ## 18- Principles of System Design - Reliability
+Reliability talks about whether or not within your system it crashes or creates some failure when it's being accessed.
+
+Mean time = average time
+![](../img/18-1.png)
+
+The result of the image above is 60 hours. Meaning that on average(mean), within a 300hr time period, there are 5 failures which means every
+60 hours there's some kind of critical failure.
+
+With reliability calculation, you're trying to determine within the actual available time period of system(previous lesson), how much failures
+are there going to be?
+
+We're trying to figure out whether or not the system is reliable to perform the function without error. You want to reduce the amount of errors or
+you wanna increase the meantime between the failures.
+
+Reliability is not as important as availability because we can get around these errors by also try to make system more available.
+
 ## 19-Networking - OSI & TCP/IP
 ## 20-TCP IP
 ## 21-TCP Explained
 ## 22-UDP
 ## 23-Proxies
-## 24-
-## 25-
-## 26-
-## 27-
-## 28-
-## 29-
-## 30-
+## 24-Load Balancing Strategies
+## 25-Server Clustering
+## 26-Databases Intro
+## 27-CAP Theorem CP
+## 28-CAP Theorem AP
+## 29-ACID and BASE Properties for Database Selection
+## 30-What's Next?
+## 31-Thank You!
