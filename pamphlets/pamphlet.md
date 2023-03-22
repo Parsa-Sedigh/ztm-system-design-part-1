@@ -307,15 +307,259 @@ you wanna increase the meantime between the failures.
 Reliability is not as important as availability because we can get around these errors by also try to make system more available.
 
 ## 19-Networking - OSI & TCP/IP
+OSI = open system interconnection
+
+General model for network communication between 2 systems. This model breaks communication into 7 abstract layers.
+
+As long as there are 2 computers that are communicating, you can use the OSI model to abstract out how the communication is happening.
+![](../img/19-1.png)
+
+Each of these layers has their own protocols.
+
+Protocols are a set of rules that define how this data should be structured and then communicated. They're gonna be structured in terms
+of the syntax(how it's written), the semantics(what key terms there are that are holding some kind of meaning), synchronization of how
+this communication is possible such as how much data gets transferred at a time and error recovery and ... . These are all rules that
+define the communication of data at a specific layer.
+
+---
+
+application layer:
+
+---
+
+presentation layer:
+
+presentation layer = translation layer
+
+In this layer, the data we get from the application layer, is extracted and then it gets manipulated and formatted so that it's ready
+to be translated across the network. What does that transformation look like? Might be encryption or decryption or compression or 
+translation.
+
+---
+
+session layer: Is the layer that is responsible for opening and closing the communication between two devices. As we know, sessions
+open and close and there's a certain period of time in which that connection is alive. So the session layer is responsible for making sure
+that a session stays long enough, in order for all the data to be properly transferred and then closed so that it's not wasting resources,
+when it's done.
+
+---
+
+transport layer: responsible for end-to-end communication between two devices. It makes sure the actual communication happens.
+This includes taking data from session layer and then splitting it into chunks and segments before sending it to the next layer underneath.
+
+---
+
+network layer: responsible for communication between major groups of networks(inter and intra networks). So if there was 2 separate
+LANs and they had to communicate with each other, the network layer is handling that. In other words, this is for communication between
+**separate** networks.
+
+---
+
+datalink layer: facilitates communication between 2 devices on the **same** network.
+
+---
+
+physical layer: has to do with transferring bits of the data into a physical cable.
+
 ## 20-TCP IP
+### Transmission control protocol / internet protocol
+TCP/IP: How computers connect to the internet and transmit data between them.
+
+TCP has builtin error checking. It's designed to ensure that data does actually get transferred completely.
+
+IP tells us the address of where we're trying to go.
+
+TCP has to do with ensuring that everything actually is getting sent to the final destination.
+
+The TCP/IP framework is 4 layers(the right one is TCP/IP layers):
+![](../img/20-1.png)
+
+- application layer: dictates the protocol that the application needs
+- presentation layer: converts the data coming across, into the format that the application requires and vice-versa
+- session layer: maintains the communication session open, so that all data gets properly transferred
+
 ## 21-TCP Explained
+In TCP, both ends can receive and send data to each other(2 way connection - data can go both way). Now in order for this to happen,
+we need to make sure that we're on the same page. We need to ensure that we're getting the correct order of data and the data is all received.
+This happens with establishment of **ISN**(initial sequence number).
+
+Both ends have their own ISN and it's a randomly generated number. It's a way for us to track on the server and client whether or not we have
+received the correct ISN from the opposing system. So if the client wants to send data to server, it's gonna send it's ISN and server will
+respond: Hey, I did get your number, I'm ready for whatever data is associated with this number. Because as the numbers change,
+it knows what the corresponding data for that number will be. So we're using ISN to track what the data is going to be and because both
+sides are trying to send data to each other, they both need to keep track of each other's ISN for that connection.
+
+The ISN represents the data being sent over for that current session connection that is established. A different connection is 
+different data all together and that's why ISN is also randomly generated.
+
+Example for TCP:
+
+The client wants to establish a connection to the server, so it will randomly generate an ISN. It will then send a synchronization req
+to the server with that ISN. The server then is gonna acknowledge that it got the client's ISN. The way it acknowledge that it received
+that synchronization req with that number, is it's gonna add 1 to that number. After receiving the incremented value, the client says:  
+Ok, I probably synchronized with the server. But remember the server also wants to send data back to the client. Meaning it it self also
+needs to synchronize back with the client with it's own ISN. So the server will generate it's own ISN as well and then it will also
+send as part of that acknowledgment, back to the client also a synchronize message as well, saying: Hey, my ISN is Y.
+
+The client is now done 2 things:
+- it's recognized that it's been acknowledged of this value X + 1
+- it's also gonna acknowledge that the server has sent it's ISN of Y 
+
+So client is gonna send back an acknowledgment with ISN of Y + 1
+
+So server in the acknowledgment that it sent, said: I acknowledge I'm ready for X + 1 and our client said: I acknowledge I'm ready for Y + 1.
+
+The reason for this is now when we send data between two, we're gonna send it with data including the ISN of X + 1 and the server is gonna
+send data to the client with ISN of Y + 1.
+
+The moment we received data and we see inside that this ISN has the actual acknowledge ISN incremented, we know what session, what data
+is correlated to, in our communication.
+
+For example:
+
+Our client is saying: Hey, for this current session that I'm sending you data, I want you to know the data is associated to 123(ISN).
+Then server is gonna say: I acknowledge that and for the session, when you send me data, send it to me with the ISN of 124, so that I know to
+correlate what you sent me to 123.
+
+The reason for this ISN + 1 is because data gets sent in chunks.
+
+Since we're receiving numerous data potentially, maybe over multiple TCP connections, how do we ensure that we know that which connection is 
+associated to which data?
+
+We associate them with ISN. Each connection has it's own ISN.
+
+HTTP and HTTPS are examples of TCP.
+
+![](../img/21-1.png)
+
+Why? Because we need all the parts of website for it to function correctly, so we use TCP with it's guarantee delivery of data.
+
+In TCP we need to transmit data between 2 directions(data flows in 2 directions, both can send and receive data). In TCP, there are 3 
+handshakes which establishes the connection.
+
 ## 22-UDP
+### UDP/IP vs TCP/IP
+UDP = user datagram protocol
+
+UDP is faster, simple and efficient than TCP. Because there's no connection. There are less resources consumed in order to maintain that 
+connection between client and server. There are no sessions in UDP.
+
+In UDP, the client sends a req to server. That req allows server to know there's a client out there that wants some data. Now the server is gonna
+keep bombarding the client with data. Whether or not that data gets over there, the server doesn't care. It doesn't need to guarantee that
+data delivery.
+
+Majority of time, you're gonna use TCP unless you're trying to build live streaming or VOIP.
+![](../img/22-1.png)
+
 ## 23-Proxies
-## 24-Load Balancing Strategies
-## 25-Server Clustering
-## 26-Databases Intro
-## 27-CAP Theorem CP
-## 28-CAP Theorem AP
-## 29-ACID and BASE Properties for Database Selection
-## 30-What's Next?
-## 31-Thank You!
+- forward proxy: sits between client and internet. So it's not in our system, it's in the client side. Now, the client will never directly
+access the internet, they'll have to access it through the proxy. Then, the internet sends these reqs to our servers in our system.
+The forward proxy can hide the details about the clients from internet and servers. Forward proxy can modify the reqs. It can even lock out
+access to websites.
+![](../img/23-1.png)
+
+- reverse proxy: It lives on our side(inside of our system). The internet will send client reqs(or forward proxy reqs) to our reverse proxy before
+it hits our servers. Since the reverse proxy is the entry point into our system now(from any reqs of the clients), the internet and therefore
+then the clients will see when they get responses, is that anything comes from the reverse proxy. So we can hide any details about where our
+servers are, maybe we can modify some of the data on proxy and ... and there are other advantages of a reverse proxy for us other than hiding
+the details.
+![](../img/24-1.png)
+
+Reverse proxy: This proxy kinda behaves like a load balancer. Because it's receiving all the reqs as an entry point and then it's forwarding
+these reqs to the servers. So we can use a reverse proxy as a load balancer. In fact many load balancers are reverse proxies. An example of
+proxy is nginx, many system use nginx as a load balancer as well as a reverse proxy. So that is one of the benefits of using a reverse proxy
+as a load balancer which is you get the other benefits that come with it(when using a reverse proxy as load balancer, you get the benefits of
+a load balancer but you also get the benefits of reverse proxy), such as: 
+- caching: You can cache a lot of what you need to deliver to
+clients on the proxy. The caching service we talked about can be the reverse proxy as well. So when we get req, we just send a res from 
+reverse proxy and this is way faster than having to forward the req from reverse proxy to servers and then servers doing their work and ... .
+- security benefits
+- another benefit is load balance requires having multiple servers, because load balancer needs to manage the load across multiple servers.
+But you can get the benefits of a proxy even if there's just a singular server. Because you still get access to caching and obfuscation of
+our servers from clients.
+![](../img/24-2.png)
+
+Generally in many systems, we're gonna use a reverse proxy as a load balancer. So when you think of a load balancer, you can also think
+about using a reverse proxy in that place.
+
+From now, when we talk about load balancer, we're talking about using a reverse proxy in that place.
+
+## 24-Exercise: Imposter Syndrome
+
+## 25-Load Balancing Strategies
+New component: Reverse proxy / load balancer
+
+- round robin: reqs gets evenly passed over to every server in the list. Everytime we get a req, we send it to the next server in the list.
+The issue with this strategy is servers are often independent of one another and they don't have any knowledge of the other servers. As a result,
+it's very easy to have some type of issues within the structure of doing round-robin because the servers oftentimes have different amount of
+resources, bandwidth and ...(also the reqs are different than one another). Now even if the reqs are the exact same and consume the same amount
+of resources, the servers themselves might have a different amount of resources available to them.
+- weighted round robin: Each server has a weight(depending on how much resource they have). The higher the number, the more resources.
+Another advantage is we can easily AB test things. Because let's say server1 has the new changes that we wanna make and we wanna a majority of 
+traffic, to server 1 so we can test things. So we can AB test based on the data of performance. So this was another benefit of breaking up
+the traffic un-evenly based on server resources or server needs.
+![](../img/25-1.png)
+- Least connections: This has to do with either sessions or depending on how many reqs are on the server, we determine that we pass req to the
+one that has the least. In img, between server 1, 2 and 3, 3 has the least, so we're gonna pass the req to server 3. Now if multiple servers has
+the same number of req, we can rely on round robin again or even weighted round robin.
+![](../img/25-2.png)
+
+Any component inside of the system can overload, go down or other failures.
+
+Note: If Reverse proxy / load balancer goes down, the entire system breaks. What we call this is **single point of failure**. When you have
+a single component that can go down and destroy the functionality of your entire service or at least a core functionality of your service.
+In this case, we want to redundant the load balancer. If the primary load balancer crashes, we can swap it with backup load balancer.
+![](../img/25-3.png)
+
+So redundancy allows us to reduce single point of failure. Maintaining the backup load balancer increases the cost and complexity.
+
+## 26-Server Clustering
+A technique you apply to a component where you increase the amount of that component(like a server) that exist.
+
+With Reverse proxy / load balancer, the servers act independent of one another. Each server has no idea about any other server in the system, 
+it doesn't care, they don't even know about each other.
+
+Clustering doesn't replace load balancing.
+
+Let's take server 1 as an example for explaining clustering:
+
+Clustering is where you have a bunch of servers that act together and are completely aware of each other and work together as a cohesive single
+unit towards some objective.
+
+For example server 1 was composed of multiple other servers that are all working in conjunction. Each of these servers working together is known
+as node.
+
+In the image below, since they are nodes, you wanna see these 5 servers together as 1 server. They all respond to 1 IP address, they share 1 
+IP address, they're treated as a single entity. As a result, you need to assign a leader node. Let's say we chose node 1 to be the leader.
+So when the req comes in, they all go through node 1. Then, node1 acts like a load balancer / reverse proxy and it will forward
+these reqs evenly between the remaining nodes. But the different between load balancers and clustering is that in load balancers outside of this
+cluster example, none of the servers are aware of each other. However, inside of a cluster, all the nodes are not only aware of each other,
+they're constantly communicating with each other and they're constantly syncing their states. By syncing their states, if any one node
+goes down, that's very easy for the remaining nodes to pick up the work that that one which is down now, was doing. There's no latency between this
+and that's the whole idea of clustering: You're trying to reduce node-to-node communication but you also making it easy for any of the nodes
+to replicate the state of a node that went down. All of these nodes hold the exact same resources. They don't share resources per se, but they have
+the identical resources, they're identical servers or nodes in this case.
+![](../img/26-1.png)
+
+Passive nodes and active nodes: When we have single point of failure, we introduce one or more passive nodes or servers or components in general.
+In the img, we have 4 nodes that are all active and sharing the load, but this might not be necessary, you may be over-utilizing
+resources to keep 4 nodes active, if the traffic is not that much. What we can do is maintain passive nodes, so we can make nodes 4 and 5 passive.
+They're there, but they're still syncing with nodes 2 and 3, there's still communication between these, the passive nodes are just not routed
+the traffic.
+![](../img/26-2.png)
+
+Now if nodes 3 or 2 go down, then nodes 4 and 5 will become active. This is whole idea of keeping these passive nodes
+![](../img/26-3.png)
+
+When having clustering, the overall server 1, 2 and 3 are not aware of each other, **inside** of these servers, they are their own cluster of
+node servers which are aware of each other. This is load balancing and clustering.
+
+Servers 1,2 and 3 aren't aware of each other:
+![](../img/26-4.png)
+
+## 27-Databases Intro
+## 28-CAP Theorem CP
+## 29-CAP Theorem AP
+## 30-ACID and BASE Properties for Database Selection
+## 31-What's Next?
+## 32-Thank You!
