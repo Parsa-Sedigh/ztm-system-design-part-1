@@ -1,0 +1,1 @@
+Important notes and slides for [ztm system design part 1](https://zerotomastery.io/courses/system-design/)
