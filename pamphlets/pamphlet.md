@@ -558,8 +558,115 @@ Servers 1,2 and 3 aren't aware of each other:
 ![](../img/26-4.png)
 
 ## 27-Databases Intro
+DBs can also be a single point of failure, so we need to reduce it using redundancy.
+
 ## 28-CAP Theorem CP
+CAP theorem is a way to think about distributed systems particularly your DBs and what types of DBs to choose for what kind of solutions you have
+regarding your data.
+
+Your system can only be 2 of these 3 things. Generally in almost all of your systems that are distributed, it's gonna be at least 
+partition tolerance guaranteed.
+![](../img/28-1.png)
+
+### Partition tolerance
+When a system is distributed, it implies that there are multiple nodes or duplicates of your DB or servers or your overall servers and this
+distribution over multiple servers throughout the world or throughout different regions is what makes it a distributed system in the first place.
+Meaning that much of your system doesn't sit on one node. Now in these systems, by nature, you have a distributed system that the nodes in it,
+communicate with each other, through networks which means if communication goes down because network goes down, you have a partition(is because
+you have a failure in network or failure in communication).
+
+In almost all systems, we can't control whether network goes down, so by default, in a distributed system you have to have partition tolerance.
+
+### Consistency
+Let's say we have 3 duplicates of our DB. Let's imagine a different ATM connect to a different duplicate of DB(or different node containing
+the DB data).
+
+Each different duplicate, must hold the same info. So the data must be consistent across the duplicates.
+
+Now if a transaction occurs which has 2 steps:
+1. we must take a credit of $100 from person1 
+2. debit $100 into person2 account
+
+In order for this DB to be consistent(because there are 3 DB nodes in our system). So no reads can happen from any of duplicates, unless all
+the other duplicates(the ones tht we didn't interact with) also get their data updated(all the DB nodes are communicating with each other
+trying to sync the state).
+
+Consistency: All of the nodes in DB must reflect the same value.
+
+Transaction is not considered complete until all the DB nodes hold the same value. Meaning your data is consistent in our distributed system.
+![](../img/28-2.png)
+
 ## 29-CAP Theorem AP
+Let's say we have a partition currently. One person makes a transaction. What happens in our system is this transaction completes and it's
+consistent with whatever nodes that the DB the person interacted with, was able to communicate to. So the direct DB and the bottom left one
+reflect the correct data after transaction.
+
+Let's say another person is connected to the DB that is partitioned from the entire system. He will see the old data. The reason why this DB
+regardless of being partitioned from the rest of the system, still returns $0(old data) is because the system is **available**. Meaning that
+data always gets returned regardless of whether or not a partition is detected in the system. 
+
+In a system that is unavailable, if there's a partition, we know the DB that person 2 interacts can't guarantee that it knows for sure that the 
+data state that it has, is stale or up to date with any transactions that has happened throughout the system. So if this was the case(we have
+a system that is not available), it will throw an error which means the creator of system has decided to create a system that is
+not as available. Because an available system will always give you back a value regardless of whether or not the data is stale or not. 
+
+The whole idea of an available system is to always provide back the data, even if the data can't be guaranteed ot be the freshest data.
+
+So if your system prioritizes availability, then you're always returning back data even if it's stale.
+
+### Consistency & availability(CA system)
+A CA system is not a distributed system. You only have 1 central node that reperesents the DB for your entire system. So any ATM connects to
+1 node. The reason why this is both consistent and available, is because you have no chance of partitions occurring because there are no multiple
+nodes.
+
+The only way that you can have partitions, is if you have a distributed system.
+
+When you choose you want a CP or AP system, depends on the problem you're solving and this decision comes down to the DB you choose to use,
+whether SQL or noSQL.
+
 ## 30-ACID and BASE Properties for Database Selection
+ACID and BASE is extension of CAP theorem.
+
+### ACID
+- atomic: an atomic DB needs to ensure that the transactions are atomic. A transaction might touch multiple records in a DB.
+Let's say we have a 2-step transaction to be considered complete, the first step gets done but in second step, system or DB encounters a bug.
+In order for this DB to be considered atomic, it must rollback all of those values that got change before the whole transaction began.
+- consistent: consistency in this case means between every transaction, the DB and all of it's nodes are consistent in data as well as
+DB is not facing any bugs
+- isolated: let's say 2 transactions are happening at the same time. If they need to work on the same records, one should happen before another or after
+the other one completes, they can't happen at the same time. Isolated means transactions are unaware of in-between states of other transaction.
+This makes it seem as running all of the transactions side by side that it happens in a sequence. This might **not** be like how the DB actually
+runs all of the transactions. In other words, isolated means truncations can't involve in the middle of another transaction.
+- durable: in the case DB goes down, it doesn't rollback to previous value if any transaction has already completed before. Meaning if a value
+has been updated from a transaction, if DB goes down, it will not rollback any values to a previous value(this only works if those transactions are complete). In other
+words, the changes that get made by complete transactions, persist regardless whether or not that DB goes down.
+
+DBs that have this ACID properties, are relational DBs.
+
+If you need an ACID compliant DB, you need a SQL DB. If you don't need ACID, then you're looking for a BASE DB.
+
+### BASE
+Stands for: Basically available, soft state, eventually consistent
+
+- Basically available: It means the availability in CAP theorem. If you get a req to DB, you always gonna return data regardless whether or not it's fresh or stale.
+- soft state: is a reflection of eventually consistency. Means that state of your data is soft or influx. It's not hard.
+- eventually consistent: When we have a system that prioritize availability, we know that there may be partitions or a slow down in actually updating
+all the nodes to reflect the same state, that is not consistent because it prioritizes showing data(availability) regardless of stale or freshness of that data.
+But it doesn't mean that we don't want that data to become consistent at some point. Eventually consistent means exactly that. Eventually, these nodes will
+be consistent in the data. It's just not the priority(availability is the priority), so as result, our state is in a soft state. Because that change might
+happen at some point, we just don't know when. It's not driven by the input. But in an ACID based system or DB, whenever input comes in(meaning whenever
+a transaction occurs), the state will pause and lock until all of those nodes are up-to-date with the same state which therefore is a hard state.
+A soft state means these nodes are influx, they'll still return values(so are not locked), it's just that at some point they'll become consistent.
+
+So in BASE, it's eventually consistent but available as possible as long as nodes are up.
+
+**Note:** So a BASE driven DB is a noSQL DB. Cassandra, redis, mongodb. They're BASE compliant.
+
+If you're working with financial institutions and transactions, you're always want a relational DB because you need to prioritize consistency over
+availability. But for example for messaging where you need the data to be available but you don't care whether or not that data is stale or fresh,
+and yeah you might care that eventually the data is consistent, you would pick a noSQL DB.
+
+With availability, it scales quickly and fast, whereas you can scale relational(SQL) DBs, it's just a bit challenging because you need consistency. 
+
 ## 31-What's Next?
 ## 32-Thank You!
